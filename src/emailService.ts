@@ -1,6 +1,6 @@
 
 import emailjs from '@emailjs/browser';
-import { CardDetails, GenerationResult } from '../types';
+import { CardDetails, GenerationResult } from './types';
 
 /**
  * Credentials mapping
