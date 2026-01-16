@@ -1,6 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { TransformationModel, ImageSize, AspectRatio } from "../types";
+import { TransformationModel, ImageSize, AspectRatio } from "./types";
 
 export const generateChristmasImage = async (
   base64Image: string,
