@@ -9,7 +9,7 @@ import {
 import { DEFAULT_WINTER_PROMPT } from './constants';
 import { 
   generateChristmasImage
-} from './services/geminiService';
+} from './geminiService';
 import { sendHolidayEmail } from './services/emailService';
 import ImageUploader from './components/ImageUploader';
 
