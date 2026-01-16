@@ -11,7 +11,7 @@ import {
   generateChristmasImage
 } from './geminiService';
 import { sendHolidayEmail } from './emailService';
-import ImageUploader from './components/ImageUploader';
+import ImageUploader from './ImageUploader';
 
 const SnowEffect = () => {
   const snowflakes = useMemo(() => {
