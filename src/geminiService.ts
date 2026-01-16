@@ -9,8 +9,8 @@ export const generateChristmasImage = async (
   size: ImageSize = '1K',
   aspectRatio: AspectRatio = '1:1'
 ): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY || '' });
+  
   const mimeType = 'image/jpeg'; 
 
   const parts: any[] = [
