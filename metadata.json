@@ -1,0 +1,7 @@
+{
+  "name": "Merry Christmas",
+  "description": "Transform your everyday photos into festive Christmas masterpieces using Gemini's advanced image-to-image technology.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

@@ -1,0 +1,2 @@
+
+export const DEFAULT_WINTER_PROMPT = 'Transform this photograph into a stunning, artistic watercolor hand-painted holiday card. Use soft, bleeding edges, visible paper texture, and a delicate palette of wintry blues, snowy whites, and warm festive reds. Add elegant holiday elements like pine branches, subtle golden ornaments, and soft falling snow. The style should be painterly, nostalgic, and dreamy, resembling a high-end traditional watercolor illustration.';
