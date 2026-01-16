@@ -10,7 +10,7 @@ import { DEFAULT_WINTER_PROMPT } from './constants';
 import { 
   generateChristmasImage
 } from './geminiService';
-import { sendHolidayEmail } from './services/emailService';
+import { sendHolidayEmail } from './emailService';
 import ImageUploader from './components/ImageUploader';
 
 const SnowEffect = () => {
