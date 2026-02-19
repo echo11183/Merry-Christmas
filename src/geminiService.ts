@@ -8,10 +8,15 @@ export const generateChristmasImage = async (
   size: ImageSize = '1K',
   aspectRatio: AspectRatio = '1:1'
 ): Promise<string> => {
-  // 必须在函数内部获取 process.env.API_KEY 并创建实例
-  // 这样才能确保获取到用户在弹窗中最新选择的密钥
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
+  let apiKey = '';
+  try {
+    // 兼容多种环境获取 API_KEY
+    apiKey = (window as any).process?.env?.API_KEY || (typeof process !== 'undefined' ? process.env.API_KEY : '');
+  } catch (e) {
+    console.warn('Could not read process.env');
+  }
+
+  if (!apiKey || apiKey === 'undefined') {
     throw new Error('API_KEY_MISSING');
   }
 
@@ -48,7 +53,7 @@ export const generateChristmasImage = async (
     });
 
     if (!response.candidates?.[0]?.content?.parts) {
-      throw new Error('No image was generated in the response.');
+      throw new Error('No image data found.');
     }
 
     for (const part of response.candidates[0].content.parts) {
@@ -57,25 +62,16 @@ export const generateChristmasImage = async (
       }
     }
   } catch (error: any) {
-    const errorMsg = error.message || '';
-    // 如果是密钥过期、无效或实体未找到，统一视为密钥问题
-    if (
-      errorMsg.includes('expired') || 
-      errorMsg.includes('API_KEY_INVALID') || 
-      errorMsg.includes('Requested entity was not found') ||
-      errorMsg.includes('403')
-    ) {
+    const msg = error.message?.toLowerCase() || '';
+    if (msg.includes('key') || msg.includes('403') || msg.includes('401') || msg.includes('not found')) {
       throw new Error('API_KEY_EXPIRED');
     }
     throw error;
   }
 
-  throw new Error('Could not find image data in the response parts.');
+  throw new Error('Image data missing in response.');
 };
 
-/**
- * 调起官方密钥选择对话框
- */
 export const openApiKeySelector = async () => {
   if (typeof (window as any).aistudio?.openSelectKey === 'function') {
     await (window as any).aistudio.openSelectKey();
