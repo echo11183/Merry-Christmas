@@ -6,17 +6,14 @@ import {
   GenerationResult
 } from './types.ts';
 import { DEFAULT_WINTER_PROMPT } from './constants.tsx';
-// 修正路径：从同级目录导入
+// ✅ 修正：直接从当前目录导入
 import { 
   generateChristmasImage,
   openApiKeySelector
 } from './geminiService.ts';
-// 修正路径与文件名：根据你的截图，文件名应为 emailService.ts
+// ✅ 修正：确保文件名与文件列表中的 emailService.ts 一致
 import { sendHolidayEmail } from './emailService.ts';
 import ImageUploader from './components/ImageUploader.tsx';
-
-// 注意：如果你的 index.tsx 里引用了 index.css，请去 index.tsx 里删掉那行，
-// 因为你的 src 目录下目前没有 index.css 文件。
 
 const SnowEffect = () => {
   const snowflakes = useMemo(() => {
