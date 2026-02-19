@@ -1,17 +1,17 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { 
   TransformationModel, 
   AspectRatio,
   CardDetails,
   GenerationResult
-} from './types';
-import { DEFAULT_WINTER_PROMPT } from './constants';
+} from './types.ts';
+import { DEFAULT_WINTER_PROMPT } from './constants.tsx';
 import { 
-  generateChristmasImage
-} from './geminiService';
-import { sendHolidayEmail } from './emailService';
-import ImageUploader from './ImageUploader';
+  generateChristmasImage,
+  openApiKeySelector
+} from './services/geminiService.ts';
+import { sendHolidayEmail } from './services/emailService.ts';
+import ImageUploader from './components/ImageUploader.tsx';
 
 const SnowEffect = () => {
   const snowflakes = useMemo(() => {
@@ -54,6 +54,7 @@ const ChristmasDecoration = () => (
 );
 
 const App: React.FC = () => {
+  const [hasKey, setHasKey] = useState<boolean>(true);
   const [selectedImageBase64, setSelectedImageBase64] = useState<string>('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -61,6 +62,7 @@ const App: React.FC = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isKeyError, setIsKeyError] = useState(false);
   const [form, setForm] = useState<CardDetails>({
     senderName: '',
     senderEmail: '',
@@ -68,6 +70,17 @@ const App: React.FC = () => {
     recipientEmail: '',
     message: ''
   });
+
+  // 初始化检查密钥
+  useEffect(() => {
+    const checkKey = async () => {
+      if (typeof (window as any).aistudio?.hasSelectedApiKey === 'function') {
+        const selected = await (window as any).aistudio.hasSelectedApiKey();
+        setHasKey(selected);
+      }
+    };
+    checkKey();
+  }, []);
 
   const handleImageSelected = useCallback((base64: string) => {
     if (!base64) {
@@ -80,9 +93,18 @@ const App: React.FC = () => {
     setSelectedImageBase64(base64);
     setPreviewUrl(`data:image/jpeg;base64,${base64}`);
     setError(null);
+    setIsKeyError(false);
     setResult(null);
     setShowSuccess(false);
   }, []);
+
+  const handleUpdateKey = async () => {
+    await openApiKeySelector();
+    // 竞态处理：触发 openSelectKey 后立即假设成功以进入应用
+    setHasKey(true);
+    setError(null);
+    setIsKeyError(false);
+  };
 
   const handleTransform = async () => {
     if (!selectedImageBase64) {
@@ -92,6 +114,7 @@ const App: React.FC = () => {
 
     setIsGenerating(true);
     setError(null);
+    setIsKeyError(false);
     setShowSuccess(false);
 
     try {
@@ -112,7 +135,12 @@ const App: React.FC = () => {
 
       setResult(newResult);
     } catch (err: any) {
-      setError(err.message || "The Christmas magic took a detour. Please try again.");
+      if (err.message === 'API_KEY_EXPIRED' || err.message === 'API_KEY_MISSING') {
+        setIsKeyError(true);
+        setError("API Key 密钥已过期或失效，请点击下方按钮重新授权。");
+      } else {
+        setError(err.message || "The Christmas magic took a detour. Please try again.");
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -168,6 +196,41 @@ const App: React.FC = () => {
 
   const displayUrl = result ? result.imageUrl : previewUrl;
 
+  // 如果没有选择密钥，显示全屏遮罩引导
+  if (!hasKey) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+        <SnowEffect />
+        <div className="panel-bg p-12 rounded-3xl max-w-md w-full text-center space-y-8 z-10 border border-white/20 backdrop-blur-xl">
+          <div className="w-24 h-24 bg-[#d4af37]/20 rounded-full flex items-center justify-center mx-auto border-2 border-[#d4af37]">
+            <i className="fas fa-key text-[#d4af37] text-4xl"></i>
+          </div>
+          <div className="space-y-4">
+            <h2 className="xmas-font text-4xl text-white tracking-wide">Ready for Magic?</h2>
+            <p className="serif-font text-[#f9f3e6] opacity-80 leading-relaxed">
+              To turn your photos into watercolor art, please connect your Google Gemini API Key.
+            </p>
+            <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+              <p className="text-[10px] text-white/50 uppercase tracking-widest leading-normal">
+                You'll need an API key from a paid GCP project. 
+                <br />
+                <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" className="underline text-[#d4af37] hover:text-white transition-colors">
+                  View Billing Documentation
+                </a>
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={handleUpdateKey}
+            className="w-full py-4 bg-[#d4af37] hover:bg-[#c4a132] text-[#630d0d] rounded-2xl xmas-font text-3xl font-bold transition-all shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Connect to Card Studio
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen px-4 py-12 md:py-20 max-w-6xl mx-auto flex flex-col items-center relative overflow-hidden">
       <SnowEffect />
@@ -196,9 +259,14 @@ const App: React.FC = () => {
               <i className="fas fa-star text-[#d4af37] text-lg"></i>
               <h2 className="serif-font text-2xl font-bold tracking-tight text-[#f9f3e6]">The Canvas</h2>
             </div>
-            {result && (
-               <span className="text-[10px] uppercase tracking-widest bg-green-800/50 px-2 py-1 rounded border border-green-500/30">Magically Painted</span>
-            )}
+            <button 
+              onClick={handleUpdateKey}
+              className="text-xs text-[#d4af37] hover:text-white transition-colors flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10"
+              title="API Key Settings"
+            >
+              <i className="fas fa-cog"></i>
+              Settings
+            </button>
           </div>
           
           <div className="flex-1 flex flex-col relative">
@@ -241,12 +309,23 @@ const App: React.FC = () => {
             </div>
 
             {error && (
-              <div className="mt-4 p-3 bg-red-900/60 border border-red-500/30 rounded-xl flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300">
-                 <i className="fas fa-exclamation-circle text-red-200 mt-0.5 shrink-0"></i>
-                 <div className="flex flex-col">
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-red-200 mb-1">Transmission Error</p>
-                   <p className="text-xs text-red-50 font-medium leading-relaxed">{error}</p>
+              <div className="mt-4 p-4 bg-red-900/60 border border-red-500/30 rounded-xl flex flex-col gap-3 animate-in slide-in-from-bottom-2 duration-300">
+                 <div className="flex items-start gap-3">
+                   <i className="fas fa-exclamation-circle text-red-200 mt-0.5 shrink-0"></i>
+                   <div className="flex flex-col">
+                     <p className="text-[10px] font-bold uppercase tracking-widest text-red-200 mb-1">Transmission Error</p>
+                     <p className="text-xs text-red-50 font-medium leading-relaxed">{error}</p>
+                   </div>
                  </div>
+                 {isKeyError && (
+                    <button 
+                      onClick={handleUpdateKey}
+                      className="w-full py-2 bg-[#d4af37] hover:bg-white text-[#630d0d] rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-2"
+                    >
+                      <i className="fas fa-key"></i>
+                      更新授权 API Key
+                    </button>
+                 )}
               </div>
             )}
           </div>
@@ -278,7 +357,6 @@ const App: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Sender Info */}
             <div className="space-y-3">
               <label className="text-[10px] font-bold text-[#d4af37] uppercase tracking-[0.2em] flex items-center gap-2">
                 <i className="fas fa-user-pen"></i> From The Sender
@@ -297,7 +375,6 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Recipient Info */}
             <div className="space-y-3">
               <label className="text-[10px] font-bold text-red-300 uppercase tracking-[0.2em] flex items-center gap-2">
                 <i className="fas fa-heart"></i> For Someone Special
@@ -316,7 +393,6 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Message Box */}
             <div className="space-y-3">
               <label className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em] flex items-center gap-2">
                 <i className="fas fa-envelope-open-text"></i> Festive Wishes
@@ -352,12 +428,6 @@ const App: React.FC = () => {
                 </>
               )}
             </button>
-            
-            <p className="text-center text-[10px] text-white/40 mt-4 italic serif-font">
-              {!result 
-                ? '✨ Create your watercolor masterpiece on the left to unlock sending' 
-                : isSending ? '💌 Packaging your memories with golden ribbons...' : '🎨 Your card is ready to spread holiday joy!'}
-            </p>
           </div>
         </div>
       </div>
