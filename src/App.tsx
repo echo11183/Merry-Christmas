@@ -9,7 +9,7 @@ import { DEFAULT_WINTER_PROMPT } from './constants.tsx';
 import { 
   generateChristmasImage,
   openApiKeySelector
-} from './services/geminiService.ts';
+} from './geminiService.ts';
 import { sendHolidayEmail } from './services/emailService.ts';
 import ImageUploader from './components/ImageUploader.tsx';
 
