@@ -50,7 +50,6 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
         }
 
-        /* Snow Effect */
         .snow-container {
             position: fixed;
             top: 0;
@@ -109,6 +108,8 @@
 </head>
 <body>
     <div id="root"></div>
-<script type="module" src="/src/index.tsx"></script>
+    <!-- 核心修复：添加入口脚本引用 -->
+    <script type="module" src="./index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
