@@ -6,12 +6,17 @@ import {
   GenerationResult
 } from './types.ts';
 import { DEFAULT_WINTER_PROMPT } from './constants.tsx';
+// 修正路径：从同级目录导入
 import { 
   generateChristmasImage,
   openApiKeySelector
 } from './geminiService.ts';
-import { sendHolidayEmail } from './mailService.ts';
+// 修正路径与文件名：根据你的截图，文件名应为 emailService.ts
+import { sendHolidayEmail } from './emailService.ts';
 import ImageUploader from './components/ImageUploader.tsx';
+
+// 注意：如果你的 index.tsx 里引用了 index.css，请去 index.tsx 里删掉那行，
+// 因为你的 src 目录下目前没有 index.css 文件。
 
 const SnowEffect = () => {
   const snowflakes = useMemo(() => {
@@ -54,7 +59,6 @@ const ChristmasDecoration = () => (
 );
 
 const App: React.FC = () => {
-  // 使用更稳健的方式初始化 hasKey 状态，防止 process 未定义时崩溃
   const [hasKey, setHasKey] = useState<boolean>(() => {
     try {
       const key = (window as any).process?.env?.API_KEY || (typeof process !== 'undefined' ? process.env.API_KEY : null);
@@ -82,13 +86,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const checkKey = async () => {
-      // 1. 优先检查 aistudio 官方提供的 Key 管理接口
       if (typeof (window as any).aistudio?.hasSelectedApiKey === 'function') {
         const selected = await (window as any).aistudio.hasSelectedApiKey();
         setHasKey(selected);
       } 
       else {
-        // 2. 环境兼容性检查
         try {
           const key = (window as any).process?.env?.API_KEY || (typeof process !== 'undefined' ? process.env.API_KEY : null);
           if (!key || key === 'undefined') {
@@ -120,7 +122,6 @@ const App: React.FC = () => {
 
   const handleUpdateKey = async () => {
     await openApiKeySelector();
-    // 假设用户操作后状态更新，进入应用
     setHasKey(true);
     setError(null);
     setIsKeyError(false);
@@ -255,7 +256,6 @@ const App: React.FC = () => {
       </header>
 
       <div className="grid lg:grid-cols-2 gap-10 w-full relative z-10 max-w-5xl">
-        {/* Creation Area */}
         <div className="panel-bg rounded-3xl p-8 shadow-2xl flex flex-col min-h-[550px] border-2 border-white/10 festive-border">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -313,7 +313,6 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Message & Send */}
         <div className="panel-bg rounded-3xl p-10 shadow-2xl space-y-8 border-2 border-white/10 festive-border relative">
           {showSuccess && (
             <div className="absolute inset-0 z-30 bg-[#165b33]/95 flex flex-col items-center justify-center p-8 text-center rounded-3xl animate-in fade-in">
