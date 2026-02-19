@@ -10,7 +10,7 @@ import {
   generateChristmasImage,
   openApiKeySelector
 } from './geminiService.ts';
-import { sendHolidayEmail } from './services/emailService.ts';
+import { sendHolidayEmail } from './mailService.ts';
 import ImageUploader from './components/ImageUploader.tsx';
 
 const SnowEffect = () => {
