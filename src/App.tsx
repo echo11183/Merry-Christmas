@@ -13,7 +13,7 @@ import {
 } from './geminiService.ts';
 // ✅ 修正：确保文件名与文件列表中的 emailService.ts 一致
 import { sendHolidayEmail } from './emailService.ts';
-import ImageUploader from './components/ImageUploader.tsx';
+import ImageUploader from './ImageUploader.tsx';
 
 const SnowEffect = () => {
   const snowflakes = useMemo(() => {
