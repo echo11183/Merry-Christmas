@@ -6,7 +6,7 @@ import {
   GenerationResult
 } from './types.ts';
 import { DEFAULT_WINTER_PROMPT } from './constants.tsx';
-// ✅ 修正：直接从当前目录导入
+// ✅ 修正：直接从当前目录导入111
 import { 
   generateChristmasImage,
   openApiKeySelector
